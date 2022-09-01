@@ -3,6 +3,11 @@ import { useState } from "react"
 import { FaUser } from "react-icons/fa"
 import { toast } from "react-toastify"
 
+import { useSelector, useDispatch } from "react-redux"
+import { register, reset } from "../features/auth/authSlice"
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+
 const Register = () => {
   const [userData, setUserData] = useState({
     name: "",
@@ -12,6 +17,24 @@ const Register = () => {
   })
 
   const { name, email, password, confirmPassword } = userData
+
+  const nagivate = useNavigate()
+  const dispatch = useDispatch()
+  const { user, isLoading, isSuccess, isError, message } = useSelector(
+    (state) => state.auth
+  )
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(message)
+    }
+
+    if (isSuccess) {
+      nagivate("/")
+    }
+
+    dispatch(reset())
+  }, [isSuccess, isError, message])
 
   const onChange = (e) => {
     setUserData((prevState) => ({
@@ -24,6 +47,14 @@ const Register = () => {
     e.preventDefault()
     if (password !== confirmPassword) {
       toast.error("Passwords don't match")
+    } else {
+      const user = {
+        name,
+        email,
+        password,
+      }
+
+      dispatch(register(user))
     }
   }
   return (
